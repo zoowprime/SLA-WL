@@ -1,34 +1,36 @@
-// Bootstrap minimal : se connecte et log "prêt"
 require('dotenv').config({ path: 'id.env' });
+const fs = require('fs');
+const path = require('path');
+const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 
-const { Client, GatewayIntentBits, Partials, ActivityType } = require('discord.js');
-
-const BOT_TOKEN = process.env.BOT_TOKEN; // fourni par Render
-const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-const GUILD_ID  = process.env.DISCORD_GUILD_ID;
-
-if (!BOT_TOKEN) {
-  console.error('[FATAL] BOT_TOKEN manquant (Render env).');
-  process.exit(1);
-}
-if (!CLIENT_ID || !GUILD_ID) {
-  console.warn('[WARN] DISCORD_CLIENT_ID ou DISCORD_GUILD_ID manquant dans id.env (ok pour le moment).');
-}
+const BOT_TOKEN = process.env.BOT_TOKEN;
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds, // minimal pour démarrer
-  ],
-  partials: [Partials.Channel]
+  intents: [GatewayIntentBits.Guilds],
+  partials: [Partials.Channel],
 });
 
-client.once('ready', () => {
-  console.log(`[SLA] Connecté en tant que ${client.user.tag}`);
-  // petite présence par défaut (modif libre)
-  client.user.setPresence({
-    activities: [{ name: 'initialisation…', type: ActivityType.Playing }],
-    status: 'online'
-  });
-});
+client.commands = new Collection();
+
+// Charger commandes
+const foldersPath = path.join(__dirname, 'src/commands');
+for (const folder of fs.readdirSync(foldersPath)) {
+  const commandsPath = path.join(foldersPath, folder);
+  for (const file of fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'))) {
+    const command = require(path.join(commandsPath, file));
+    client.commands.set(command.data.name, command);
+  }
+}
+
+// Charger events
+const eventsPath = path.join(__dirname, 'src/events');
+for (const file of fs.readdirSync(eventsPath).filter(f => f.endsWith('.js'))) {
+  const event = require(path.join(eventsPath, file));
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(client, ...args));
+  } else {
+    client.on(event.name, (...args) => event.execute(client, ...args));
+  }
+}
 
 client.login(BOT_TOKEN);
