@@ -1,51 +1,45 @@
 require('dotenv').config({ path: 'id.env' });
-
 const fs = require('fs');
 const path = require('path');
 const { REST, Routes } = require('discord.js');
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-const GUILD_ID = process.env.DISCORD_GUILD_ID;
+const GUILD_ID  = process.env.DISCORD_GUILD_ID;
 
 if (!BOT_TOKEN || !CLIENT_ID || !GUILD_ID) {
-  console.error('[FATAL] Variables manquantes. Vérifie BOT_TOKEN (Render), DISCORD_CLIENT_ID et DISCORD_GUILD_ID (id.env).');
+  console.error('[FATAL] BOT_TOKEN / DISCORD_CLIENT_ID / DISCORD_GUILD_ID manquants.');
   process.exit(1);
 }
 
-const commands = [];
-
-// Parcourir src/commands et sous-dossiers
-const foldersPath = path.join(__dirname, 'src/commands');
-const commandFolders = fs.readdirSync(foldersPath);
-
-for (const folder of commandFolders) {
-  const commandsPath = path.join(foldersPath, folder);
-  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-
-  for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-
-    if ('data' in command && 'execute' in command) {
-      commands.push(command.data.toJSON());
-    } else {
-      console.warn(`[WARN] La commande à ${filePath} est invalide (il manque data ou execute).`);
+function collectCommands(dir) {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...collectCommands(full));
+    else if (entry.isFile() && entry.name.endsWith('.js')) {
+      const cmd = require(full);
+      if (cmd?.data?.toJSON) out.push({ name: cmd.data.name, json: cmd.data.toJSON(), file: full });
     }
   }
+  return out;
 }
+
+const base = path.join(__dirname, 'src/commands');
+const found = fs.existsSync(base) ? collectCommands(base) : [];
+console.log(`[DEPLOY] ${found.length} commande(s) trouvée(s):`, found.map(c => `${c.name} (${path.relative(process.cwd(), c.file)})`).join(', ') || '(aucune)');
 
 const rest = new REST({ version: '10' }).setToken(BOT_TOKEN);
 
 (async () => {
   try {
-    console.log(`[SLA] Déploiement de ${commands.length} commande(s) → serveur ${GUILD_ID}`);
-    await rest.put(
-      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-      { body: commands },
-    );
-    console.log('[SLA] Déploiement terminé.');
-  } catch (error) {
-    console.error(error);
+    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: found.map(c => c.json) });
+    console.log('[DEPLOY] OK. Vérification…');
+    const published = await rest.get(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID));
+    console.log('[DEPLOY] Enregistrées côté Discord:', published.map(c => c.name).join(', ') || '(aucune)');
+
+  } catch (e) {
+    console.error('[DEPLOY] Échec:', e);
+    process.exit(1);
   }
 })();
