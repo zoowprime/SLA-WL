@@ -4,40 +4,33 @@ const path = require('path');
 const DATA_DIR = process.env.DATA_DIR || './data';
 const FILE = path.join(DATA_DIR, 'dm-sessions.json');
 
-function ensureDataDir() {
+function ensure() {
   try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch {}
-  if (!fs.existsSync(FILE)) fs.writeFileSync(FILE, JSON.stringify({ map: {} }, null, 2));
+  if (!fs.existsSync(FILE)) fs.writeFileSync(FILE, JSON.stringify({ byUser: {} }, null, 2));
 }
-ensureDataDir();
+ensure();
 
-function load() {
+function read() {
   try { return JSON.parse(fs.readFileSync(FILE, 'utf8')); }
-  catch { return { map: {} }; }
+  catch { return { byUser: {} }; }
 }
-function save(db) {
-  fs.writeFileSync(FILE, JSON.stringify(db, null, 2));
-}
+function write(db) { fs.writeFileSync(FILE, JSON.stringify(db, null, 2)); }
 
-function setSession(userId, channelId) {
-  const db = load();
-  db.map[userId] = { channelId, updatedAt: Date.now() };
-  save(db);
+function set(userId, channelId) {
+  const db = read();
+  db.byUser[userId] = { channelId, updatedAt: Date.now() };
+  write(db);
 }
-function getChannelByUser(userId) {
-  const db = load();
-  return db.map[userId]?.channelId || null;
-}
-function getUserByChannel(channelId) {
-  const db = load();
-  const entry = Object.entries(db.map).find(([, v]) => v.channelId === channelId);
-  return entry ? entry[0] : null;
+function getChannel(userId) {
+  const db = read();
+  return db.byUser[userId]?.channelId || null;
 }
 function removeByChannel(channelId) {
-  const db = load();
-  for (const [uid, v] of Object.entries(db.map)) {
-    if (v.channelId === channelId) { delete db.map[uid]; break; }
+  const db = read();
+  for (const [uid, v] of Object.entries(db.byUser)) {
+    if (v.channelId === channelId) { delete db.byUser[uid]; break; }
   }
-  save(db);
+  write(db);
 }
 
-module.exports = { setSession, getChannelByUser, getUserByChannel, removeByChannel };
+module.exports = { set, getChannel, removeByChannel };
