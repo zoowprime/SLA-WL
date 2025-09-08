@@ -1,6 +1,7 @@
 const { ChannelType } = require('discord.js');
-const { getUserByChannel, removeByChannel } = require('../services/store');
-const { DELETE_ROLES, memberHasAnyRole } = require('../utils/perms');
+const { memberHasAnyRole, DELETE_ROLES } = require('../utils/perms');
+const { isOpenTicketChannel } = require('../services/support');
+const store = require('../services/store');
 
 module.exports = {
   name: 'interactionCreate',
@@ -10,26 +11,28 @@ module.exports = {
     const ch = interaction.channel;
     if (!ch || ch.type !== ChannelType.GuildText) return;
 
-    const userId = getUserByChannel(ch.id);
-    if (!userId) return interaction.reply({ content: 'Ce salon n’est pas lié à un DM.', ephemeral: true });
+    const topic = ch.topic || '';
+    if (!topic.startsWith('DM:')) return;
+
+    const userId = topic.slice(3);
 
     if (interaction.customId === 'dm_close') {
       const closeCat = process.env.CLOSE_TICKET_CATEGORY_ID;
-      const target = await client.users.fetch(userId).catch(()=>null);
-      if (target) await target.send('✅ Votre discussion support a été **clôturée**. Vous pouvez rouvrir en réécrivant au bot.').catch(()=>{});
-      if (closeCat) await ch.setParent(closeCat).catch(()=>{});
-      await interaction.reply({ content: 'Salon **clôturé** et déplacé.', ephemeral: true });
+      if (isOpenTicketChannel(ch) && closeCat) {
+        await ch.setParent(closeCat).catch(()=>{});
+      }
+      await interaction.reply({ content: '✅ Ticket **clôturé** et déplacé.', ephemeral: true });
+      // on garde le mapping: si fermé, on ne le réutilisera plus (il est hors catégorie open)
       return;
     }
 
     if (interaction.customId === 'dm_delete') {
-      // protection : seuls rôles sup peuvent supprimer
       if (!memberHasAnyRole(interaction.member, DELETE_ROLES)) {
         return interaction.reply({ content: '❌ Tu n’as pas la permission de **supprimer** ce ticket.', ephemeral: true });
       }
-      removeByChannel(ch.id);
-      await interaction.reply({ content: 'Salon supprimé…', ephemeral: true });
-      await ch.delete('DM ticket supprimé par staff').catch(()=>{});
+      store.removeByChannel(ch.id);
+      await interaction.reply({ content: '🗑️ Ticket supprimé.', ephemeral: true });
+      await ch.delete('Ticket DM supprimé').catch(()=>{});
       return;
     }
   }
