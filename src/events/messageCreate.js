@@ -1,106 +1,75 @@
-// Debug + DM relay minimal
 const { ChannelType, PermissionsBitField } = require('discord.js');
 
 module.exports = {
   name: 'messageCreate',
   async execute(client, message) {
-    // LOG DIAG (tu verras ça dans les logs Render)
-    console.log('[messageCreate]', {
-      isDM: !message.guild,
-      authorBot: !!message.author?.bot,
-      content: message.content?.slice(0, 80) || '',
-      attaches: message.attachments?.size || 0
-    });
-
-    // A) DM utilisateur -> créer un salon staff et relayer
+    // DM -> staff
     if (!message.guild && !message.author.bot) {
-      const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
-      if (!guild) return console.error('[DM] Guild introuvable (DISCORD_GUILD_ID)');
+      const GUILD_ID = process.env.DISCORD_GUILD_ID;
+      if (!GUILD_ID) {
+        console.error('[DM] DISCORD_GUILD_ID manquant dans id.env');
+        return;
+      }
 
-      // Catégorie où créer les tickets
+      // >>> fetch plutôt que cache.get
+      const guild = await client.guilds.fetch(GUILD_ID).catch(() => null);
+      if (!guild) {
+        console.error('[DM] Guild introuvable. Le bot est-il bien dans cette guilde ? Id =', GUILD_ID);
+        return;
+      }
+
       const parentId = process.env.DEV_TICKET_CATEGORY_ID || null;
+      const name = `dm-${message.author.username}-${message.author.id}`.toLowerCase().slice(0, 90);
 
-      // Cherche si un salon pour cet utilisateur existe déjà
-      const existing = guild.channels.cache.find(c => 
-        c.type === ChannelType.GuildText &&
-        c.parentId === parentId &&
-        c.topic === `DM:${message.author.id}`
-      );
-      let channel = existing;
+      // On tente de retrouver un salon existant par topic
+      let channel = null;
+      try {
+        const channels = await guild.channels.fetch();
+        channel = channels.find(c => c?.type === ChannelType.GuildText && c?.topic === `DM:${message.author.id}`) || null;
+      } catch {}
 
-      // Crée le salon si pas trouvé
       if (!channel) {
-        const name = `dm-${message.author.username}-${message.author.id}`.toLowerCase().slice(0, 90);
         try {
           channel = await guild.channels.create({
             name,
             type: ChannelType.GuildText,
             parent: parentId ?? undefined,
-            topic: `DM:${message.author.id}`, // on s’y repère plus tard
+            topic: `DM:${message.author.id}`,
             permissionOverwrites: [
               { id: guild.roles.everyone, deny: [PermissionsBitField.Flags.ViewChannel] },
-              // le user voit son salon, peut écrire
-              { id: message.author.id, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory] },
-              // le bot
-              { id: client.user.id, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.ManageChannels] },
+              { id: message.author.id,  allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory] },
+              { id: client.user.id,     allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory, PermissionsBitField.Flags.ManageChannels] },
             ],
             reason: `DM support pour ${message.author.tag} (${message.author.id})`,
           });
-          await channel.send(`📥 **Nouveau DM ouvert par ${message.author.tag}** (ID: \`${message.author.id}\`)`);
+          await channel.send(`📥 **Nouveau DM** de ${message.author.tag} (\`${message.author.id}\`)`);
         } catch (e) {
-          console.error('[DM] Création salon échouée (permissions/catégorie ?):', e);
-          // Si ça plante, au moins logguer dans le channel d’archive
-          const logId = process.env.ALL_TICKET_LOGS;
-          if (logId) {
-            const logCh = await client.channels.fetch(logId).catch(() => null);
-            if (logCh) await logCh.send(`⚠️ Impossible de créer le salon pour **${message.author.tag}**. Vérifie les permissions/catégorie.`);
-          }
+          console.error('[DM] Création salon échouée :', e);
           return;
         }
       }
 
-      // Relais DM -> salon staff
       const files = [...message.attachments.values()].map(a => a.url);
       const content = message.content?.trim() || (files.length ? '(fichier)' : '(vide)');
-      await channel.send({ content: `**${message.author.tag}**: ${content}`, files }).catch(e => {
-        console.error('[DM] Envoi vers salon staff KO:', e);
-      });
-
-      // Accusé de réception au joueur (silencieux si DM fermés)
-      if (message.content) {
-        await message.channel.send('✅ Support reçu. Un membre du staff te répond ici.').catch(()=>{});
-      }
-
-      // Log archive
-      const logId = process.env.ALL_TICKET_LOGS;
-      if (logId) {
-        const logCh = await client.channels.fetch(logId).catch(() => null);
-        if (logCh) await logCh.send(`🧾 **DM → Staff** | ${message.author.tag}\n${content}`);
-      }
+      await channel.send({ content: `**${message.author.tag}**: ${content}`, files }).catch(() => {});
+      await message.channel.send('✅ Support reçu. Un membre du staff va te répondre ici.').catch(() => {});
       return;
     }
 
-    // B) Staff -> DM utilisateur (si on écrit dans un salon lié)
+    // Staff -> DM (si topic "DM:<id>")
     if (message.guild && !message.author.bot) {
       const topic = message.channel?.topic || '';
-      if (!topic.startsWith('DM:')) return; // pas un salon DM-relay
-
+      if (!topic.startsWith('DM:')) return;
       const userId = topic.slice(3);
-      const user = await client.users.fetch(userId).catch(()=>null);
+
+      const user = await message.client.users.fetch(userId).catch(() => null);
       if (!user) return;
 
       const files = [...message.attachments.values()].map(a => a.url);
       const content = message.content?.trim() || (files.length ? '(fichier)' : '(vide)');
-
       await user.send({ content, files }).catch(async () => {
-        await message.channel.send('⚠️ Impossible d’envoyer le message en DM (utilisateur fermé aux MP).');
+        await message.channel.send('⚠️ Impossible d’envoyer le message en DM (MP fermés).');
       });
-
-      const logId = process.env.ALL_TICKET_LOGS;
-      if (logId) {
-        const logCh = await client.channels.fetch(logId).catch(() => null);
-        if (logCh) await logCh.send(`🧾 **Staff → DM** | ${message.member?.displayName || message.author.tag}\n${content}`);
-      }
     }
   }
 };
