@@ -11,8 +11,9 @@ function startBot() {
       GatewayIntentBits.GuildMembers,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.MessageContent,
+      GatewayIntentBits.DirectMessages
     ],
-    partials: [Partials.Channel, Partials.Message, Partials.Reaction],
+    partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User, Partials.GuildMember],
   });
 
   client.commands = new Collection();
