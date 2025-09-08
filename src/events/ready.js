@@ -7,7 +7,6 @@ module.exports = {
     console.log(`[SLA] Connecté en tant que ${client.user.tag}`);
     console.log('[ENV] DISCORD_GUILD_ID =', process.env.DISCORD_GUILD_ID);
 
-    // Liste les guilds où est le bot
     const guilds = await client.guilds.fetch();
     console.log('[GUILDS] Bot est dans :', [...guilds.keys()].join(', '));
 
