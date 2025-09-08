@@ -8,21 +8,26 @@ module.exports = {
   name: 'interactionCreate',
   async execute(client, interaction) {
     try {
+      // Trace universelle
+      console.log('[INTERACTION]', {
+        type: interaction.isChatInputCommand() ? 'slash' : interaction.isButton() ? 'button' : 'other',
+        name: interaction.isChatInputCommand() ? interaction.commandName : interaction.customId,
+      });
+
       // ===== Slash commands =====
       if (interaction.isChatInputCommand()) {
         const cmd = interaction.client.commands.get(interaction.commandName);
-        if (!cmd) return;
+        if (!cmd) { console.warn('[CMD] inconnue:', interaction.commandName); return; }
 
-        // Auto-defer si la commande tarde (sécurité anti 3s)
-        // -> on défère tout de suite, comme ça on est tranquille
+        // Anti-timeout
         if (!interaction.deferred && !interaction.replied) {
           await interaction.deferReply({ ephemeral: true }).catch(()=>{});
         }
 
         try {
-          await cmd.execute(interaction); // dans tes commandes, utilise editReply/followUp
-          // (Chaque commande peut appeler logCommand; sinon on peut log ici)
+          await cmd.execute(interaction); // Les commandes utilisent editReply
         } catch (e) {
+          console.error('[CMD] erreur:', e);
           await logCommand(client, {
             user: interaction.user,
             command: interaction.commandName,
@@ -41,10 +46,8 @@ module.exports = {
 
       // ===== Boutons (DM tickets) =====
       if (interaction.isButton()) {
-        // Déférer tout de suite pour éviter le timeout
         let acked = false;
         if (!interaction.deferred && !interaction.replied) {
-          // pour un bouton qui modifie l’UI en place, on peut faire deferUpdate();
           await interaction.deferReply({ ephemeral: true }).catch(()=>{});
           acked = true;
         }
@@ -54,8 +57,6 @@ module.exports = {
 
         const topic = ch.topic || '';
         if (!topic.startsWith('DM:')) return;
-
-        const userId = topic.slice(3);
 
         if (interaction.customId === 'dm_close') {
           const closeCat = process.env.CLOSE_TICKET_CATEGORY_ID;
@@ -69,8 +70,9 @@ module.exports = {
 
         if (interaction.customId === 'dm_delete') {
           if (!memberHasAnyRole(interaction.member, DELETE_ROLES)) {
-            if (acked) await interaction.editReply('❌ Tu n’as pas la permission de **supprimer** ce ticket.').catch(()=>{});
-            else await interaction.reply({ content: '❌ Tu n’as pas la permission de **supprimer** ce ticket.', ephemeral: true }).catch(()=>{});
+            const msg = '❌ Tu n’as pas la permission de **supprimer** ce ticket.';
+            if (acked) await interaction.editReply(msg).catch(()=>{});
+            else await interaction.reply({ content: msg, ephemeral: true }).catch(()=>{});
             return;
           }
           store.removeByChannel(ch.id);
@@ -81,13 +83,12 @@ module.exports = {
         }
       }
     } catch (err) {
-      // Dernier filet
+      console.error('[interactionCreate] Uncaught:', err);
       try {
         if (interaction?.isRepliable() && !interaction.deferred && !interaction.replied) {
           await interaction.reply({ content: '❌ Erreur inattendue.', ephemeral: true });
         }
       } catch {}
-      console.error('[interactionCreate] Uncaught:', err);
     }
   }
 };
