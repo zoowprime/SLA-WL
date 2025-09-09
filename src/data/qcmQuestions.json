@@ -1,257 +1,257 @@
 [
   {
     "question": "❓ Quelle est la règle de base pour les arnaques ?",
-    "choices": ["🅱️ Elles sont totalement interdites", "🅰️ Elles doivent mener à une scène RP", "🇨 Elles n'ont aucune limite"],
+    "choices": ["Elles sont totalement interdites", "Elles doivent mener à une scène RP", "Elles n'ont aucune limite"],
     "answer": "Elles doivent mener à une scène RP"
   },
   {
     "question": "❓ Quel pourcentage maximum d’argent peut être volé lors d’une arnaque ?",
-    "choices": ["🅱️ 50 %", "🅰️ 25 %", "🇨 75 %"],
+    "choices": ["50 %", "25 %", "75 %"],
     "answer": "50 %"
   },
   {
     "question": "❓ Quel type de langage est interdit en jeu ?",
-    "choices": ["🅱️ Langage RP soutenu", "🅰️ Langage HRP", "🇨 Langage poli"],
+    "choices": ["Langage RP soutenu", "Langage HRP", "Langage poli"],
     "answer": "Langage HRP"
   },
   {
     "question": "❓ Quel exemple est considéré comme HRP interdit ?",
-    "choices": ["🅱️ Bonjour monsieur", "🅰️ Attends, je suis dans ma tête", "🇨 Bonne chance à toi"],
+    "choices": ["Bonjour monsieur", "Attends, je suis dans ma tête", "Bonne chance à toi"],
     "answer": "Attends, je suis dans ma tête"
   },
   {
     "question": "❓ Que ne doit pas contenir une commande /me ?",
-    "choices": ["🅱️ Des actions visibles", "🇨 Des gestes simples", "🅰️ Des infos que le personnage ne peut pas savoir"],
+    "choices": ["Des actions visibles", "Des gestes simples", "Des infos que le personnage ne peut pas savoir"],
     "answer": "Des infos que le personnage ne peut pas savoir"
   },
   {
     "question": "❓ À quoi sert la commande /me ?",
-    "choices": ["🅰️ Décrire une action de son personnage", "🅱️ Envoyer un message HRP", "🇨 Donner des ordres au staff"],
+    "choices": ["Décrire une action de son personnage", "Envoyer un message HRP", "Donner des ordres au staff"],
     "answer": "Décrire une action de son personnage"
   },
   {
     "question": "❓ Quand vous portez un masque, qu'est-ce qui ne peut pas être reconnu ?",
-    "choices": ["🅰️ Votre voix", "🅱️ Votre accent", "🇨 Votre style vestimentaire"],
+    "choices": ["Votre voix", "Votre accent", "Votre style vestimentaire"],
     "answer": "Votre voix"
   },
   {
     "question": "❓ Qu’est-il obligatoire avant une mort RP ?",
-    "choices": ["🅱️ Une scène d’otage", "🇨 Une fusillade", "🅰️ Un dossier validé par le staff"],
+    "choices": ["Une scène d’otage", "Une fusillade", "Un dossier validé par le staff"],
     "answer": "Un dossier validé par le staff"
   },
   {
     "question": "❓ Quelle règle s’applique face à la police ?",
-    "choices": ["🅰️ Fear RP obligatoire", "🅱️ Ignorer la police", "🇨 Toujours riposter"],
+    "choices": ["Fear RP obligatoire", "Ignorer la police", "Toujours riposter"],
     "answer": "Fear RP obligatoire"
   },
   {
     "question": "❓ Que risque un joueur blessé qui ne joue pas sa scène à l’hôpital ?",
-    "choices": ["🅱️ Un avertissement", "🇨 Rien du tout", "🅰️ Mort RP + sanction HRP"],
+    "choices": ["Un avertissement", "Rien du tout", "Mort RP + sanction HRP"],
     "answer": "Mort RP + sanction HRP"
   },
   {
     "question": "❓ Quelle conséquence a une prise d’otage d’un agent du LAPD ?",
-    "choices": ["🅱️ Récompense en argent", "🅰️ Mort RP des auteurs", "🇨 Ban automatique"],
+    "choices": ["Récompense en argent", "Mort RP des auteurs", "Ban automatique"],
     "answer": "Mort RP des auteurs"
   },
   {
     "question": "❓ À partir de quelle somme le SAPD commence à se méfier ?",
-    "choices": ["🅱️ 2 500 $", "🅰️ 3 000 $", "🇨 10 000 $"],
+    "choices": ["2 500 $", "3 000 $", "10 000 $"],
     "answer": "3 000 $"
   },
   {
     "question": "❓ Quelles conséquences pour une vengeance RP incohérente ?",
-    "choices": ["🅰️ Mort RP immédiate", "🅱️ Un simple avertissement", "🇨 Une réduction d’argent"],
+    "choices": ["Mort RP immédiate", "Un simple avertissement", "Une réduction d’argent"],
     "answer": "Mort RP immédiate"
   },
   {
     "question": "❓ Qu’est-il interdit avec le Rp Poucave ?",
-    "choices": ["🅰️ Dénoncer un groupe aux LAPD", "🅱️ Donner de fausses infos", "🇨 Mentir à ses alliés"],
+    "choices": ["Dénoncer un groupe aux LAPD", "Donner de fausses infos", "Mentir à ses alliés"],
     "answer": "Dénoncer un groupe aux LAPD"
   },
   {
     "question": "❓ Que doivent faire les leads en cas de Mort RP interne ?",
-    "choices": ["🅰️ La déclarer dans un ticket", "🅱️ Ne rien faire", "🇨 Demander l’accord des joueurs"],
+    "choices": ["La déclarer dans un ticket", "Ne rien faire", "Demander l’accord des joueurs"],
     "answer": "La déclarer dans un ticket"
   },
   {
     "question": "❓ Lors d’une fusillade, qu’est-il interdit ?",
-    "choices": ["🅱️ Utiliser un abri", "🅰️ Prendre de la hauteur", "🇨 Changer d’arme"],
+    "choices": ["Utiliser un abri", "Prendre de la hauteur", "Changer d’arme"],
     "answer": "Prendre de la hauteur"
   },
   {
     "question": "❓ Que signifie un drive-by autorisé ?",
-    "choices": ["🅰️ Tirer en tant que passager avec revendication", "🅱️ Changer de véhicule en scène", "🇨 Rouler vite dans un quartier"],
+    "choices": ["Tirer en tant que passager avec revendication", "Changer de véhicule en scène", "Rouler vite dans un quartier"],
     "answer": "Tirer en tant que passager avec revendication"
   },
   {
     "question": "❓ Quel est le statut du PPA pour un illégal ?",
-    "choices": ["🅰️ Interdit de le passer", "🅱️ Obligatoire", "🇨 Optionnel"],
+    "choices": ["Interdit de le passer", "Obligatoire", "Optionnel"],
     "answer": "Interdit de le passer"
   },
   {
     "question": "❓ Qu’est-il interdit dans la vente de drogue ?",
-    "choices": ["🅰️ Vente mobile en voiture/moto", "🅱️ Vendre dans un appartement", "🇨 Vendre à un PNJ"],
+    "choices": ["Vente mobile en voiture/moto", "Vendre dans un appartement", "Vendre à un PNJ"],
     "answer": "Vente mobile en voiture/moto"
   },
   {
     "question": "❓ Combien d’armes automatiques/pompes max par voiture en guerre ?",
-    "choices": ["🅰️ 1", "🅱️ 2", "🇨 Aucune limite"],
+    "choices": ["1", "2", "Aucune limite"],
     "answer": "1"
   },
   {
     "question": "❓ Après une action lancée contre un gang, que faut-il faire ?",
-    "choices": ["🅰️ Attendre la réponse", "🅱️ Lancer une nouvelle action", "🇨 Changer de zone"],
+    "choices": ["Attendre la réponse", "Lancer une nouvelle action", "Changer de zone"],
     "answer": "Attendre la réponse"
   },
   {
     "question": "❓ Que signifie « acte = conséquence » ?",
-    "choices": ["🅱️ On peut tout faire sans limite", "🅰️ Chaque action entraîne des répercussions", "🇨 Seul le staff décide des sanctions"],
+    "choices": ["On peut tout faire sans limite", "Chaque action entraîne des répercussions", "Seul le staff décide des sanctions"],
     "answer": "Chaque action entraîne des répercussions"
   },
   {
     "question": "❓ Quel comportement est attendu des joueurs ?",
-    "choices": ["🅱️ Toujours gagner", "🇨 Éviter les scènes", "🅰️ Fair play et respect"],
+    "choices": ["Toujours gagner", "Éviter les scènes", "Fair play et respect"],
     "answer": "Fair play et respect"
   },
   {
     "question": "❓ Quelles conséquences pour le RP Pookie ou indic ?",
-    "choices": ["🅱️ Un avertissement", "🅰️ Mort RP possible", "🇨 Aucune conséquence"],
+    "choices": ["Un avertissement", "Mort RP possible", "Aucune conséquence"],
     "answer": "Mort RP possible"
   },
   {
     "question": "❓ Quel statut a un joueur avec casier judiciaire actif ?",
-    "choices": ["🅰️ Illégal", "🅱️ Toujours légal", "🇨 Neutre"],
+    "choices": ["Illégal", "Toujours légal", "Neutre"],
     "answer": "Illégal"
   },
   {
     "question": "❓ Un joueur avec casier peut-il travailler au gouvernement ?",
-    "choices": ["🅰️ Non", "🅱️ Oui", "🇨 Uniquement de nuit"],
+    "choices": ["Non", "Oui", "Uniquement de nuit"],
     "answer": "Non"
   },
   {
     "question": "❓ Quelles difficultés rencontre un joueur illégal ?",
-    "choices": ["🅰️ Obtenir des licences", "🅱️ Se déplacer", "🇨 Utiliser son téléphone"],
+    "choices": ["Obtenir des licences", "Se déplacer", "Utiliser son téléphone"],
     "answer": "Obtenir des licences"
   },
   {
     "question": "❓ Un civil illégal sans groupe est considéré comme :",
-    "choices": ["🅰️ Civil illégal", "🅱️ Membre d’un set", "🇨 Citoyen neutre"],
+    "choices": ["Civil illégal", "Membre d’un set", "Citoyen neutre"],
     "answer": "Civil illégal"
   },
   {
     "question": "❓ Combien de personnes max pour une action illégale d’un civil illégal ?",
-    "choices": ["🅰️ 3", "🅱️ 5", "🇨 Illimité"],
+    "choices": ["3", "5", "Illimité"],
     "answer": "3"
   },
   {
     "question": "❓ Un civil illégal peut-il passer le PPA ?",
-    "choices": ["🅱️ Oui", "🇨 Uniquement sur dossier", "🅰️ Non"],
+    "choices": ["Oui", "Uniquement sur dossier", "Non"],
     "answer": "Non"
   },
   {
     "question": "❓ Quel type de véhicules est interdit pour l’illégal ?",
-    "choices": ["🅰️ Ultra sportives PNJ", "🅱️ Toute la liste", "🇨 Camions"],
+    "choices": ["Ultra sportives PNJ", "Toute la liste", "Camions"],
     "answer": "Ultra sportives PNJ"
   },
   {
     "question": "❓ Quel est le délai minimum avant un plan illégal ?",
-    "choices": ["🅱️ 30 minutes", "🅰️ 10 minutes", "🇨 1 heure"],
+    "choices": ["30 minutes", "10 minutes", "1 heure"],
     "answer": "10 minutes"
   },
   {
     "question": "❓ Combien de plans mule/récup max autorisés ?",
-    "choices": ["🅰️ 3", "🅱️ 5", "🇨 Illimité"],
+    "choices": ["3", "5", "Illimité"],
     "answer": "3"
   },
   {
     "question": "❓ Quelle règle sur les convois s’applique aux illégaux ?",
-    "choices": ["🅰️ Convois interdits", "🅱️ Convois obligatoires", "🇨 Convois libres"],
+    "choices": ["Convois interdits", "Convois obligatoires", "Convois libres"],
     "answer": "Convois interdits"
   },
   {
     "question": "❓ Que doivent refléter les déplacements des gangs ?",
-    "choices": ["🅰️ Culture des gangs US", "🅱️ Culture européenne", "🇨 Style libre"],
+    "choices": ["Culture des gangs US", "Culture européenne", "Style libre"],
     "answer": "Culture des gangs US"
   },
   {
     "question": "❓ Quel moyen de transport est cohérent pour un gang ?",
-    "choices": ["🅱️ SUV blindé", "🇨 Voiture de luxe", "🅰️ BMX/Vélo"],
+    "choices": ["SUV blindé", "Voiture de luxe", "BMX/Vélo"],
     "answer": "BMX/Vélo"
   },
   {
     "question": "❓ Qu’est-il interdit pour les gangs en centre-ville ?",
-    "choices": ["🅰️ Traîner trop souvent", "🅱️ Marcher à pied", "🇨 Prendre le métro"],
+    "choices": ["Traîner trop souvent", "Marcher à pied", "Prendre le métro"],
     "answer": "Traîner trop souvent"
   },
   {
     "question": "❓ Quelle est la taille max d’une clique ?",
-    "choices": ["🅰️ 4 joueurs", "🅱️ 6 joueurs", "🇨 Illimité"],
+    "choices": ["4 joueurs", "6 joueurs", "Illimité"],
     "answer": "4 joueurs"
   },
   {
     "question": "❓ Qu’est-il obligatoire pour chaque clique ?",
-    "choices": ["🅰️ Claim son nom et son set", "🅱️ Faire une guerre", "🇨 Avoir 10 membres"],
+    "choices": ["Claim son nom et son set", "Faire une guerre", "Avoir 10 membres"],
     "answer": "Claim son nom et son set"
   },
   {
     "question": "❓ Combien de planques peut avoir une clique ?",
-    "choices": ["🅱️ 2", "🇨 Illimité", "🅰️ 1"],
+    "choices": ["2", "Illimité", "1"],
     "answer": "1"
   },
   {
     "question": "❓ Quel est le rôle principal des MC ?",
-    "choices": ["🅰️ Vente d’armes/munitions", "🅱️ Vente de voitures", "🇨 Contrôle des banques"],
+    "choices": ["Vente d’armes/munitions", "Vente de voitures", "Contrôle des banques"],
     "answer": "Vente d’armes/munitions"
   },
   {
     "question": "❓ Où sont situés les MC ?",
-    "choices": ["🅱️ Centre-ville uniquement", "🇨 À Paleto", "🅰️ Nord et sud de San Andreas"],
+    "choices": ["Centre-ville uniquement", "À Paleto", "Nord et sud de San Andreas"],
     "answer": "Nord et sud de San Andreas"
   },
   {
     "question": "❓ Qui peut faire des convois illégaux ?",
-    "choices": ["🅱️ Tous les gangs", "🇨 Les civils illégaux", "🅰️ MC uniquement"],
+    "choices": ["Tous les gangs", "Les civils illégaux", "MC uniquement"],
     "answer": "MC uniquement"
   },
   {
     "question": "❓ Un membre de MC doit toujours porter :",
-    "choices": ["🅰️ Son cuir", "🅱️ Un masque", "🇨 Un uniforme"],
+    "choices": ["Son cuir", "Un masque", "Un uniforme"],
     "answer": "Son cuir"
   },
   {
     "question": "❓ Que doit maîtriser un joueur MC ?",
-    "choices": ["🅰️ Le lore et la hiérarchie", "🅱️ La météo", "🇨 Les règles HRP"],
+    "choices": ["Le lore et la hiérarchie", "La météo", "Les règles HRP"],
     "answer": "Le lore et la hiérarchie"
   },
   {
     "question": "❓ Quel type de langage est interdit pour un MC ?",
-    "choices": ["🅱️ Le langage biker", "🅰️ Le 'wesh wesh'", "🇨 Les insultes RP"],
+    "choices": ["Le langage biker", "Le 'wesh wesh'", "Les insultes RP"],
     "answer": "Le 'wesh wesh'"
   },
   {
     "question": "❓ Quelles actions sont possibles en guerre de gangs ?",
-    "choices": ["🅰️ Shooting, prise d’otage, drive-by", "🅱️ Braquage banque", "🇨 Se cacher 24h"],
+    "choices": ["Shooting, prise d’otage, drive-by", "Braquage banque", "Se cacher 24h"],
     "answer": "Shooting, prise d’otage, drive-by"
   },
   {
     "question": "❓ Quelle règle d’engagement s’applique en guerre de gangs ?",
-    "choices": ["🅰️ Pas deux mêmes actions d’affilée", "🅱️ Toujours répondre par la violence", "🇨 Interdiction de revendiquer"],
+    "choices": ["Pas deux mêmes actions d’affilée", "Toujours répondre par la violence", "Interdiction de revendiquer"],
     "answer": "Pas deux mêmes actions d’affilée"
   },
   {
     "question": "❓ Quand l’illégal peut être joué ?",
-    "choices": ["🅱️ 24h/24", "🇨 Uniquement le week-end", "🅰️ De 14h à 2h"],
+    "choices": ["24h/24", "Uniquement le week-end", "De 14h à 2h"],
     "answer": "De 14h à 2h"
   },
   {
     "question": "❓ Quelle est la limite d’un plan mule/récup illégal ?",
-    "choices": ["🅱️ 10 max", "🇨 Illimité", "🅰️ 3 max"],
+    "choices": ["10 max", "Illimité", "3 max"],
     "answer": "3 max"
   },
   {
     "question": "❓ Que doivent faire les gangs avec leurs territoires ?",
-    "choices": ["🅰️ Les occuper de manière réaliste", "🅱️ Ne jamais y rester", "🇨 Rester en centre-ville"],
+    "choices": ["Les occuper de manière réaliste", "Ne jamais y rester", "Rester en centre-ville"],
     "answer": "Les occuper de manière réaliste"
   }
 ]
