@@ -6,7 +6,6 @@ const {
   StringSelectMenuBuilder,
   ChannelType,
   PermissionsBitField,
-  ComponentType,
 } = require('discord.js');
 
 const QUESTIONS = require('../data/qcmQuestions.json');
@@ -28,13 +27,14 @@ function emojiIndex(i) {
   return ['🅰️', '🅱️', '🇨'][i] || '🔸';
 }
 function emojifyChoices(choices) {
+  // choices sont SANS emoji dans le JSON → on ajoute ici
   return choices.map((c, i) => `${emojiIndex(i)} ${c}`);
 }
 function sanitizeLabel(label) {
   return String(label).slice(0, 100);
 }
 function staffRoleIdsFromEnv() {
-  const ids = [
+  return [
     process.env.MODO_ROLE_ID,
     process.env.ADMIN_ROLE_ID,
     process.env.SUPADMIN_ROLE_ID,
@@ -43,13 +43,8 @@ function staffRoleIdsFromEnv() {
     process.env.CONSEILLER_ROLE_ID,
     process.env.COFONDA_ROLE_ID,
     process.env.FONDA_ROLE_ID,
+    ...(process.env.QCM_STAFF_ROLE_IDS || '').split(',').map(s => s.trim())
   ].filter(Boolean);
-  // Support d’une liste CSV éventuelle
-  const extra = (process.env.QCM_STAFF_ROLE_IDS || '')
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean);
-  return Array.from(new Set([...ids, ...extra]));
 }
 
 async function logQcm(client, payload) {
@@ -60,23 +55,16 @@ async function logQcm(client, payload) {
     if (!ch?.isTextBased()) return;
 
     const {
-      type, // 'start' | 'answer' | 'end'
-      user, // {id, tag}
-      channelId,
-      score,
-      total,
-      questionIndex,
-      question,
-      selected,
-      correct,
-      passed,
+      type, user, channelId, score, total,
+      questionIndex, question, selected, correct, passed,
     } = payload;
 
-    const color = type === 'end' ? (passed ? 0x00ff88 : 0xff4444) : (type === 'answer' ? 0xffcc00 : 0x5865F2);
-    const title =
-      type === 'start' ? '🟢 Démarrage QCM'
-      : type === 'answer' ? '📝 Réponse QCM'
-      : '🏁 Fin de QCM';
+    const color = type === 'end' ? (passed ? 0x00ff88 : 0xff4444)
+                : type === 'answer' ? 0xffcc00
+                : 0x5865F2;
+    const title = type === 'start' ? '🟢 Démarrage QCM'
+                : type === 'answer' ? '📝 Réponse QCM'
+                : '🏁 Fin de QCM';
 
     const eb = new EmbedBuilder()
       .setColor(color)
@@ -106,7 +94,7 @@ async function logQcm(client, payload) {
 
 // ===== Module principal =====
 module.exports = (client) => {
-  // 1) Panneau de lancement (une seule fois)
+  // 1) Panneau de lancement (unique)
   client.once('clientReady', async () => {
     const chId = process.env.QCM_LANCEMENT_CHANNEL_ID;
     if (!chId) return console.error('[QCM] QCM_LANCEMENT_CHANNEL_ID non défini');
@@ -137,9 +125,7 @@ module.exports = (client) => {
       new StringSelectMenuBuilder()
         .setCustomId('qcm_launcher')
         .setPlaceholder('🚀 Lancer le QCM…')
-        .addOptions([
-          { label: '🚀 Démarrer le QCM', value: 'launch', description: 'Crée ton salon privé et commence le test.' },
-        ])
+        .addOptions([{ label: '🚀 Démarrer le QCM', value: 'launch', description: 'Crée ton salon privé et commence le test.' }])
     );
 
     await ch.send({ embeds: [embed], components: [row] });
@@ -151,15 +137,13 @@ module.exports = (client) => {
       // 2.1 Lanceur
       if (interaction.isStringSelectMenu() && interaction.customId === 'qcm_launcher') {
         const member = interaction.member;
-        const choice = interaction.values?.[0];
-        if (choice !== 'launch') {
+        if (interaction.values?.[0] !== 'launch') {
           return interaction.reply({ content: '❌ Choix invalide.', ephemeral: true });
         }
 
-        // Ajoute uniquement QCM_EN_COURS
         const QCM_EN_COURS = process.env.QCM_EN_COURS_ROLE_ID;
         if (!QCM_EN_COURS) {
-          return interaction.reply({ content: '⚠️ QCM_EN_COURS_ROLE_ID manquant dans l’environnement.', ephemeral: true });
+          return interaction.reply({ content: '⚠️ QCM_EN_COURS_ROLE_ID manquant.', ephemeral: true });
         }
         try {
           await member.roles.add(QCM_EN_COURS).catch(() => {});
@@ -168,21 +152,18 @@ module.exports = (client) => {
           return interaction.reply({ content: '❗ Impossible d’ajouter le rôle QCM EN COURS (permissions ?).', ephemeral: true }).catch(()=>{});
         }
 
-        // Création salon privé QCM
+        // Salon privé QCM
         let channel;
         try {
           const parent = process.env.QCM_CATEGORY_OPEN_ID || null;
           const staffRoles = staffRoleIdsFromEnv();
-
           const overwrites = [
             { id: interaction.guild.id, deny: [PermissionsBitField.Flags.ViewChannel] },
             { id: member.id, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory] },
           ];
-          // Accès pour chaque rôle staff autorisé
           for (const rid of staffRoles) {
             overwrites.push({ id: rid, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ReadMessageHistory] });
           }
-
           channel = await interaction.guild.channels.create({
             name: `qcm-${member.user.username}`.toLowerCase().replace(/[^a-z0-9\-]/g, ''),
             type: ChannelType.GuildText,
@@ -190,18 +171,16 @@ module.exports = (client) => {
             permissionOverwrites: overwrites,
             reason: 'QCM: nouveau candidat',
           });
-        } catch (e) {
+        } catch {
           return interaction.followUp({ content: '❗ Impossible de créer ton salon QCM (permissions ?).', ephemeral: true }).catch(()=>{});
         }
 
-        // Log démarrage
         await logQcm(interaction.client, {
           type: 'start',
           user: { id: member.id, tag: member.user.tag },
           channelId: channel.id,
         });
 
-        // Panneau DÉMARRER (Oui/Non) — 1 seul embed
         const startEmbed = new EmbedBuilder()
           .setColor(0xED4245)
           .setTitle('🎬 Prêt à commencer ?')
@@ -256,15 +235,10 @@ module.exports = (client) => {
           return;
         }
 
-        // Utiliser 50 questions (ou tout le pool si <50)
         const totalQuestions = Math.min(50, Array.isArray(QUESTIONS) ? QUESTIONS.length : 0);
         const pool = pick(QUESTIONS, totalQuestions).map(q => {
           const shuffledChoices = shuffle(q.choices);
-          return {
-            question: q.question,
-            choices: shuffledChoices,
-            answer: q.answer,
-          };
+          return { question: q.question, choices: shuffledChoices, answer: q.answer };
         });
 
         channel.qcmState = {
@@ -274,7 +248,7 @@ module.exports = (client) => {
           score: 0,
           pool,
           pendingChoiceIndex: null,
-          needed: 32, // seuil de réussite
+          needed: 32,
         };
 
         await interaction.update({});
@@ -282,7 +256,7 @@ module.exports = (client) => {
         return;
       }
 
-      // 2.3 Choix de réponse -> confirmation
+      // 2.3 Choix -> confirmation
       if (interaction.isStringSelectMenu() && interaction.customId.startsWith('qcm_q_')) {
         const [, , expectedUserId] = interaction.customId.split('_');
         if (interaction.user.id !== expectedUserId) {
@@ -313,13 +287,7 @@ module.exports = (client) => {
           .setColor(0xF1C40F)
           .setTitle(`❓ Question ${st.index + 1} / ${st.pool.length}`)
           .setDescription(
-            [
-              `**${q.question}**`,
-              '',
-              `👉 Tu as sélectionné : **${chosen}**`,
-              '',
-              `❔ **Es-tu sûr de ta réponse ?**`,
-            ].join('\n')
+            [`**${q.question}**`, '', `👉 Tu as sélectionné : **${chosen}**`, '', `❔ **Es-tu sûr de ta réponse ?**`].join('\n')
           );
 
         const confirmRow = new ActionRowBuilder().addComponents(
@@ -337,7 +305,7 @@ module.exports = (client) => {
         return;
       }
 
-      // 2.4 Confirmation -> valider ou revenir
+      // 2.4 Confirmation -> valider/revenir
       if (interaction.isStringSelectMenu() && interaction.customId.startsWith('qcm_confirm_')) {
         const expectedUserId = interaction.customId.split('_')[2];
         if (interaction.user.id !== expectedUserId) {
@@ -349,7 +317,6 @@ module.exports = (client) => {
         if (!st) return interaction.reply({ content: '⚠️ Cette session est terminée.', ephemeral: true });
 
         const choice = interaction.values[0];
-
         if (choice === 'no') {
           st.step = 'question';
           st.pendingChoiceIndex = null;
@@ -361,8 +328,8 @@ module.exports = (client) => {
         // Validation
         const q = st.pool[st.index];
         const selectedIdx = st.pendingChoiceIndex;
-        const selectedRaw = q.choices[selectedIdx];
-        const correct = selectedRaw === q.answer;
+        const selectedRaw = q.choices[selectedIdx];        // <- brut, sans emoji
+        const correct = selectedRaw === q.answer;          // comparaison fiable
 
         if (correct) st.score++;
 
@@ -372,7 +339,7 @@ module.exports = (client) => {
           channelId: channel.id,
           questionIndex: st.index,
           question: q.question,
-          selected: `${emojiIndex(selectedIdx)} ${selectedRaw}`,
+          selected: `${emojiIndex(selectedIdx)} ${selectedRaw}`, // affichage avec emoji
           correct,
         });
 
@@ -391,9 +358,7 @@ module.exports = (client) => {
           try {
             const member = await interaction.guild.members.fetch(expectedUserId);
             if (QCM_EN_COURS) await member.roles.remove(QCM_EN_COURS).catch(()=>{});
-            if (passed && ORAL_A_FAIRE) {
-              await member.roles.add(ORAL_A_FAIRE).catch(()=>{});
-            }
+            if (passed && ORAL_A_FAIRE) await member.roles.add(ORAL_A_FAIRE).catch(()=>{});
           } catch {}
 
           await logQcm(interaction.client, {
@@ -432,17 +397,15 @@ module.exports = (client) => {
         return;
       }
     } catch (e) {
-      try {
-        if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
-          await interaction.reply({ content: '⚠️ Une erreur est survenue pendant le QCM.', ephemeral: true });
-        }
-      } catch {}
+      try { if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content: '⚠️ Une erreur est survenue pendant le QCM.', ephemeral: true });
+      }} catch {}
       console.error('[QCM] Uncaught error:', e);
     }
   });
 };
 
-// ===== Rendu d’une question (1 seul embed actif) =====
+// ===== Rendu d’une question (1 seul embed) =====
 async function renderQuestion(client, channel, userId) {
   const st = channel.qcmState;
   if (!st) return;
@@ -476,7 +439,5 @@ async function renderQuestion(client, channel, userId) {
   );
 
   const msg = await channel.messages.fetch(st.msgId).catch(()=>null);
-  if (msg) {
-    await msg.edit({ embeds: [embed], components: [row] }).catch(()=>{});
-  }
+  if (msg) await msg.edit({ embeds: [embed], components: [row] }).catch(()=>{});
 }
