@@ -29,30 +29,57 @@ function startBot() {
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
-      GatewayIntentBits.DirectMessages,
+      GatewayIntentBits.GuildMembers,   // nécessaire pour roles.add/remove
+      GatewayIntentBits.GuildMessages,  // utile si tu logs des messages ailleurs
+      GatewayIntentBits.MessageContent, // optionnel pour QCM, mais ok si tu l'utilises déjà
+      GatewayIntentBits.DirectMessages, // pas requis pour ce QCM, mais ok si DM ailleurs
     ],
     partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User, Partials.GuildMember],
   });
 
-  // ===== CHARGER COMMANDES =====
+  // ===== COMMANDES =====
   client.commands = new Collection();
   const cmdDir = path.join(__dirname, 'commands');
   const found = collectCommands(cmdDir);
   for (const c of found) client.commands.set(c.name, c.mod);
   console.log(`[BOOT] Commandes chargées: ${found.map(c => c.name).join(', ') || '(aucune)'}`);
 
-  // ===== CHARGER EVENTS =====
+  // ===== EVENTS =====
   const eventsPath = path.join(__dirname, 'events');
   if (fs.existsSync(eventsPath)) {
     for (const file of fs.readdirSync(eventsPath).filter(f => f.endsWith('.js'))) {
-      const ev = require(path.join(eventsPath, file));
-      if (ev.once) client.once(ev.name, (...args) => ev.execute(client, ...args));
-      else client.on(ev.name, (...args) => ev.execute(client, ...args));
+      const full = path.join(eventsPath, file);
+      try {
+        const ev = require(full);
+
+        // Style 1: fonction d'init (ex: qcmNoCmd.js, welcome.js)
+        if (typeof ev === 'function') {
+          ev(client);
+          console.log(`[events] init  (fn)  → ${file}`);
+          continue;
+        }
+
+        // Style 2: objet { name, once, execute }
+        if (ev && typeof ev === 'object' && ev.name && typeof ev.execute === 'function') {
+          if (ev.once) client.once(ev.name, (...args) => ev.execute(client, ...args));
+          else client.on(ev.name, (...args) => ev.execute(client, ...args));
+          console.log(`[events] bind ${ev.once ? 'once' : 'on  '} → ${ev.name} (${file})`);
+          continue;
+        }
+
+        console.warn('[events] ignoré (format non reconnu) →', file);
+      } catch (e) {
+        console.error('[events] erreur chargement', file, e);
+      }
     }
+  } else {
+    console.warn('[events] dossier introuvable:', eventsPath);
   }
+
+  // Petit log prêt
+  client.once('clientReady', () => {
+    console.log(`[SLA] Connecté en tant que ${client.user.tag}`);
+  });
 
   client.login(process.env.BOT_TOKEN);
 }
